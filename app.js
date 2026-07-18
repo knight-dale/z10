@@ -69,13 +69,7 @@ function initials(name) {
   return (name || '').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
-/* ---------- Login page ---------- */
-
 async function initLoginPage() {
-  // Wire everything up FIRST, synchronously — so if the session check below
-  // throws (bad Supabase URL/key, network hiccup, etc.) the login buttons
-  // still work. Previously the wiring ran after two awaited calls, so an
-  // early failure there silently prevented the buttons from ever working.
   wireLoginPageButtons();
   loadLandingStats();
 
@@ -93,24 +87,18 @@ async function initLoginPage() {
 }
 
 function wireLoginPageButtons() {
-  document.getElementById('member-login-nav').onclick = () => openLoginDialog('member');
-  document.getElementById('treasurer-login-nav').onclick = () => openLoginDialog('treasurer');
-  document.getElementById('member-login-hero').onclick = () => openLoginDialog('member');
-  document.getElementById('treasurer-login-hero').onclick = () => openLoginDialog('treasurer');
+  document.getElementById('login-nav').onclick = openLoginDialog;
+  document.getElementById('login-hero').onclick = openLoginDialog;
   document.getElementById('login-dialog-close').onclick = closeLoginDialog;
-  document.getElementById('portal-opt-member').onclick = () => selectPortalType('member');
-  document.getElementById('portal-opt-treasurer').onclick = () => selectPortalType('treasurer');
   document.getElementById('login-form').onsubmit = handleLogin;
 
-  // Click on the backdrop (outside the card) closes the dialog too.
   const dialog = document.getElementById('login-dialog');
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) closeLoginDialog();
   });
 }
 
-function openLoginDialog(portalType) {
-  selectPortalType(portalType);
+function openLoginDialog() {
   document.getElementById('login-dialog').showModal();
 }
 
@@ -119,7 +107,6 @@ function closeLoginDialog() {
 }
 
 async function loadLandingStats() {
-  // Server computes avgReturn now — client just displays it.
   try {
     const stats = await gasFetch('getLandingStats');
     document.getElementById('stat-pool').textContent = formatPool(stats.totalPool);
@@ -134,15 +121,6 @@ function formatPool(n) {
   if (n >= 1000000) return 'KSh ' + (n / 1000000).toFixed(2) + 'M';
   if (n >= 1000) return 'KSh ' + (n / 1000).toFixed(1) + 'K';
   return 'KSh ' + n.toLocaleString();
-}
-
-function selectPortalType(type) {
-  document.getElementById('portal-opt-member').classList.toggle('selected', type === 'member');
-  document.getElementById('portal-opt-treasurer').classList.toggle('selected', type === 'treasurer');
-  document.getElementById('login-form').dataset.portalType = type;
-  document.getElementById('login-subtitle').textContent = type === 'treasurer'
-    ? 'Treasurer access — full platform view'
-    : 'Sign in to your member account';
 }
 
 async function handleLogin(e) {
@@ -171,8 +149,6 @@ async function handleLogout() {
   window.location.href = 'index.html';
 }
 
-/* ---------- Shared shell wiring ---------- */
-
 function wireSidebar(profile) {
   document.getElementById('sidebar-user-name').textContent = profile.name;
   document.getElementById('sidebar-user-email').textContent = profile.email;
@@ -198,8 +174,6 @@ function setActiveTab(tabId) {
   if (tabId === 'treasurer-investments') renderTreasurerInvestments();
 }
 
-/* ---------- Member portal ---------- */
-
 let memberState = { profile: null, contributions: [], loans: [], payments: [], summary: {}, loanRoom: {} };
 
 async function initMemberPortal() {
@@ -218,8 +192,6 @@ async function initMemberPortal() {
 }
 
 async function loadMemberData() {
-  // All loan math (interest, penalty, balance, grace/overdue status) now comes
-  // pre-computed from the Apps Script backend — nothing to calculate here.
   const data = await gasFetch('getMemberPortalData');
   memberState.profile = data.profile;
   memberState.contributions = data.contributions || [];
@@ -353,8 +325,6 @@ async function saveMemberProfile(e) {
     mpesaNumber: document.getElementById('profile-mpesa').value
   };
   try {
-    // Routed through GAS (updateOwnProfile) so no table write happens directly
-    // from the browser — the service-role key never leaves the server.
     const updated = await gasFetch('updateOwnProfile', payload);
     memberState.profile = updated;
     toast('Profile updated successfully!', 'success');
@@ -363,8 +333,6 @@ async function saveMemberProfile(e) {
     toast(err.message || 'Failed to update profile', 'error');
   }
 }
-
-/* ---------- Treasurer portal ---------- */
 
 let treasurerState = { profile: null, members: [], contributions: [], loans: [], investments: [], groupTotals: {} };
 
@@ -392,8 +360,6 @@ async function initTreasurerPortal() {
 }
 
 async function loadTreasurerData() {
-  // Member outstanding balances, net amounts, loan decoration, and group
-  // totals are all computed server-side now — just store what comes back.
   const data = await gasFetch('getTreasurerPortalData');
   treasurerState.members = data.members || [];
   treasurerState.contributions = data.contributions || [];
@@ -547,8 +513,6 @@ async function toggleMemberActive(memberId, currentlyActive) {
   const label = currentlyActive ? 'Deactivate' : 'Restore';
   if (!confirm(`${label} this member?`)) return;
   try {
-    // Routed through GAS (setMemberActive) instead of a direct Supabase write,
-    // so the treasurer-only check on the server actually applies.
     await gasFetch('setMemberActive', { memberId, isActive: !currentlyActive });
     await loadTreasurerData();
     renderTreasurerMembers();
@@ -559,10 +523,6 @@ async function toggleMemberActive(memberId, currentlyActive) {
 }
 
 async function deleteMember(memberId, memberName) {
-  // Permanent — deleting the auth user cascades to the profile row and
-  // everything tied to it (contributions, loans, repayments, etc). If the
-  // member has any real history, deactivating (the button next to this one)
-  // is almost always the better choice.
   const confirmed = confirm(
     `Permanently delete ${memberName}?\n\nThis erases their login AND all of their contribution/loan/payment history. This cannot be undone.\n\nClick OK to permanently delete.`
   );
@@ -693,9 +653,6 @@ async function saveTreasurerProfile(e) {
   const payload = {
     name: document.getElementById('t-profile-name').value,
     phone: document.getElementById('t-profile-phone').value,
-    // This form has no M-Pesa field, but actionUpdateOwnProfile always sets
-    // mpesa_number from payload.mpesaNumber. Pass the existing value through
-    // so saving name/phone doesn't silently wipe it to null.
     mpesaNumber: treasurerState.profile.mpesa_number || null
   };
   try {
@@ -707,8 +664,6 @@ async function saveTreasurerProfile(e) {
     toast(err.message || 'Failed to update profile', 'error');
   }
 }
-
-/* ---------- Modal helpers ---------- */
 
 function openModal(id) {
   if (id === 'contribution-modal' || id === 'loan-modal') populateMemberSelects();
