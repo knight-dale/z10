@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#C9A84C" />
+<title>Z10 — Savings & Investment Platform</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0F14'/><text y='.9em' font-size='72' font-family='Arial Black' font-weight='900' fill='%23C9A84C' x='10'>Z</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="style.css" />
+<style>
+  /* Inline fallback so the dialog displays correctly even if style.css
+     doesn't define anything for it — the login flow shouldn't depend on
+     an external stylesheet loading/matching correctly. */
+  #login-dialog {
+    border: none;
+    padding: 0;
+    border-radius: 16px;
+    max-width: 420px;
+    width: 90%;
+    background: transparent;
+  }
+  #login-dialog::backdrop {
+    background: rgba(13, 15, 20, 0.65);
+  }
+  #login-dialog .login-card {
+    position: relative;
+    background: var(--card-bg, #fff);
+    border-radius: 16px;
+    padding: 32px;
+  }
+  #login-dialog-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--ink-muted, #888);
+  }
+</style>
+</head>
+<body>
+
+<div id="landing-view" class="landing-container">
+  <nav class="landing-nav">
+    <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--ink)">Z<span style="color:var(--gold)">10</span></div>
+    <div class="nav-actions">
+      <button id="member-login-nav" type="button" class="landing-btn landing-btn-outline">🔑 Member Login</button>
+      <button id="treasurer-login-nav" type="button" class="landing-btn landing-btn-gold">🏛️ Treasurer Portal</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Grow <em>together.</em><br />Invest boldly.</h1>
+    <p class="hero-sub">Z10 is a member-run savings and investment platform where contributions build real wealth — shared fairly among everyone who shows up.</p>
+    <div class="hero-ctas">
+      <button id="member-login-hero" type="button" class="landing-btn landing-btn-gold" style="font-size:16px;padding:16px 36px">🔑 Member Login</button>
+      <button id="treasurer-login-hero" type="button" class="landing-btn landing-btn-outline" style="font-size:16px;padding:16px 36px">📊 Treasurer Portal</button>
+    </div>
+
+    <div class="stats-live-bar">
+      <div class="stat-live-item">
+        <div class="stat-val-live"><span id="stat-pool">KSh 0</span></div>
+        <div class="stat-live-label">Total Pool</div>
+      </div>
+      <div class="stat-live-item">
+        <div class="stat-val-live"><span id="stat-members">0</span></div>
+        <div class="stat-live-label">Active Members</div>
+      </div>
+      <div class="stat-live-item">
+        <div class="stat-val-live"><span id="stat-return">0%</span></div>
+        <div class="stat-live-label">Avg Return</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-section">
+    <div class="section-eyebrow">How Z10 Works</div>
+    <h2 class="section-title">Simple rules. Transparent money.</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3 class="feature-title">Monthly Contributions</h3>
+        <p class="feature-desc">Members make contributions to the shared pool, building collective wealth over time.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3 class="feature-title">Collective Investments</h3>
+        <p class="feature-desc">Pooled funds are deployed into approved investments. Profits are distributed proportionally.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏦</div>
+        <h3 class="feature-title">Flexible Loans</h3>
+        <p class="feature-desc">Members can borrow up to 85% of their contributions with fair, transparent interest terms.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<dialog id="login-dialog">
+  <div class="login-card">
+    <button id="login-dialog-close" type="button" aria-label="Close">&times;</button>
+    <div class="login-logo">Z<span>10</span></div>
+    <div id="login-subtitle" class="login-subtitle">Sign in to your member account</div>
+
+    <div class="portal-selector">
+      <div id="portal-opt-member" class="portal-opt selected">
+        <div class="portal-opt-icon">👤</div>
+        <div class="portal-opt-label">Member</div>
+        <div class="portal-opt-desc">Personal account</div>
+      </div>
+      <div id="portal-opt-treasurer" class="portal-opt">
+        <div class="portal-opt-icon">🏛️</div>
+        <div class="portal-opt-label">Treasurer</div>
+        <div class="portal-opt-desc">Full access</div>
+      </div>
+    </div>
+
+    <form id="login-form" data-portal-type="member">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input id="login-email" class="form-control" type="email" placeholder="your@email.com" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="login-password" class="form-control" type="password" placeholder="••••••••" required />
+      </div>
+      <button id="login-submit-btn" type="submit" class="btn btn-gold btn-block">Sign In →</button>
+    </form>
+
+    <div class="divider"></div>
+    <div style="font-size:12px;color:var(--ink-muted);text-align:center">
+      <strong>Treasurer login:</strong><br />
+      Members are added by the Treasurer
+    </div>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+<script>initLoginPage();</script>
+</body>
+</html>
