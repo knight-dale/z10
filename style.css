@@ -103,7 +103,27 @@ input, select, textarea { font-family: 'Inter', sans-serif; font-size: 14px; }
 .alert.warning { background: var(--warning-light); color: var(--warning); border: 1px solid rgba(230,126,34,0.3); }
 .alert.danger { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(192,57,43,0.3); }
 .alert.info { background: rgba(201,168,76,0.1); color: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); }
+.password-field-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 
+.password-field-container input {
+  padding-right: 40px;
+}
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none !important;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-muted);
+  padding: 5px;
+}
+.toggle-password:hover {
+  color: var(--gold);
+}
 .table-wrap { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th {

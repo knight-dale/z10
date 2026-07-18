@@ -391,6 +391,21 @@ function renderTreasurerDashboard() {
   `).join('') || emptyRow(3, 'No contributions yet');
 }
 
+function togglePasswordVisibility() {
+  const passwordInput = document.getElementById('login-password');
+  const eyeIcon = document.getElementById('password-eye-icon');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    eyeIcon.classList.remove('fa-eye');
+    eyeIcon.classList.add('fa-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    eyeIcon.classList.remove('fa-eye-slash');
+    eyeIcon.classList.add('fa-eye');
+  }
+}
+
 function renderTreasurerMembers() {
   const body = document.getElementById('t-members-body');
   body.innerHTML = treasurerState.members.map(m => `
